@@ -25,7 +25,7 @@
     "@ai-sdk/react": "^3.0.0",
     "@auth0/ai": "^6.0.0",
     "@auth0/ai-vercel": "^5.1.0",
-    "@auth0/nextjs-auth0": "^4.13.0",
+    "@auth0/nextjs-auth0": "^4.16.0",
     "@langchain/community": "^0.3.53",
     "@radix-ui/react-avatar": "^1.1.7",
     "@radix-ui/react-checkbox": "^1.2.3",
@@ -72,6 +72,7 @@
     "@types/react": "19.0.9",
     "@types/react-dom": "19.0.3",
     "autoprefixer": "^10.4.20",
+    "baseline-browser-mapping": "^2.10.0",
     "drizzle-kit": "^0.31.1",
     "eslint": "^9.20.1",
     "eslint-config-next": "^15.1.7",
@@ -79,7 +80,7 @@
     "postcss": "8.5.2",
     "prettier": "^3.4.2",
     "tailwindcss": "3.4.17",
-    "tsx": "^4.19.4",
+    "tsx": "4.19.4",
     "typescript": "5.7.3"
   }
 }

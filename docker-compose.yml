@@ -1,7 +1,7 @@
 services:
   postgres:
     image: pgvector/pgvector:pg17
-    container_name: postgres_pgvector
+    container_name: postgres_pgvector_arize
     environment:
       POSTGRES_DB: ai_documents_db
       POSTGRES_USER: postgres
