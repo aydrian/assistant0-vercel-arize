@@ -1,7 +1,9 @@
 import { NextRequest } from 'next/server';
 import {
   streamText,
+  stepCountIs,
   type UIMessage,
+  type StepResult,
   createUIMessageStream,
   createUIMessageStreamResponse,
   convertToModelMessages,
@@ -9,6 +11,7 @@ import {
 import { openai } from '@ai-sdk/openai';
 import { setAIContext } from '@auth0/ai-vercel';
 import { errorSerializer, withInterruptions } from '@auth0/ai-vercel/interrupts';
+import { Auth0Interrupt } from '@auth0/ai/interrupts';
 import { context } from '@opentelemetry/api';
 import { setSession, setUser } from '@arizeai/openinference-core';
 import { auth0 } from '@/lib/auth0';
@@ -23,6 +26,11 @@ import { getContextDocumentsTool } from '@/lib/tools/context-docs';
 import { listRepositories } from '@/lib/tools/list-gh-repos';
 import { listGitHubEvents } from '@/lib/tools/list-gh-events';
 import { listSlackChannels } from '@/lib/tools/list-slack-channels';
+
+const stopOnAuthInterrupt = ({ steps }: { steps: StepResult<any>[] }) =>
+  steps[steps.length - 1]?.content.some(
+    (part) => part.type === 'tool-error' && (part as any).error instanceof Auth0Interrupt,
+  ) ?? false;
 
 const date = new Date().toISOString();
 
@@ -42,10 +50,7 @@ export async function POST(req: NextRequest) {
 
   const authSession = await auth0.getSession();
   const userId = authSession?.user.sub ?? 'anonymous';
-  const activeContext = setUser(
-    setSession(context.active(), { sessionId: id }),
-    { userId },
-  );
+  const activeContext = setUser(setSession(context.active(), { sessionId: id }), { userId });
 
   const tools = {
     ...(serpApiTool ? { serpApiTool } : {}),
@@ -70,10 +75,11 @@ export async function POST(req: NextRequest) {
       async ({ writer }) => {
         await context.with(activeContext, async () => {
           const result = streamText({
-            model: openai.chat('gpt-4o-mini'),
+            model: openai.chat('gpt-5-mini'),
             system: AGENT_SYSTEM_TEMPLATE,
             messages: modelMessages,
             tools: tools as any,
+            stopWhen: [stepCountIs(5), stopOnAuthInterrupt],
             experimental_telemetry: {
               isEnabled: true,
               functionId: 'assistant0-chat',
