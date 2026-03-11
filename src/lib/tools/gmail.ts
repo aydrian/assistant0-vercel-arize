@@ -23,8 +23,14 @@ export const gmailSearchTool = withGmailRead(
       resource: z.enum(['messages', 'threads']).optional(),
     }),
     execute: async (args) => {
-      const result = await gmailSearch._call(args);
-      return result;
+      try {
+        return await gmailSearch._call(args);
+      } catch (error) {
+        if (error instanceof Error && error.message === 'No messages returned from Gmail') {
+          return `No emails found matching the query: "${args.query}"`;
+        }
+        throw error;
+      }
     },
   }),
 );

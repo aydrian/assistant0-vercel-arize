@@ -9,6 +9,9 @@ import {
 import { openai } from '@ai-sdk/openai';
 import { setAIContext } from '@auth0/ai-vercel';
 import { errorSerializer, withInterruptions } from '@auth0/ai-vercel/interrupts';
+import { context } from '@opentelemetry/api';
+import { setSession, setUser } from '@arizeai/openinference-core';
+import { auth0 } from '@/lib/auth0';
 
 import { serpApiTool } from '@/lib/tools/serpapi';
 import { getUserInfoTool } from '@/lib/tools/user-info';
@@ -37,6 +40,13 @@ export async function POST(req: NextRequest) {
 
   setAIContext({ threadID: id });
 
+  const authSession = await auth0.getSession();
+  const userId = authSession?.user.sub ?? 'anonymous';
+  const activeContext = setUser(
+    setSession(context.active(), { sessionId: id }),
+    { userId },
+  );
+
   const tools = {
     ...(serpApiTool ? { serpApiTool } : {}),
     getUserInfoTool,
@@ -58,34 +68,40 @@ export async function POST(req: NextRequest) {
     originalMessages: messages,
     execute: withInterruptions(
       async ({ writer }) => {
-        const result = streamText({
-          model: openai.chat('gpt-4o-mini'),
-          system: AGENT_SYSTEM_TEMPLATE,
-          messages: modelMessages,
-          tools: tools as any,
-          onFinish: (output) => {
-            if (output.finishReason === 'tool-calls') {
-              const lastMessage = output.content[output.content.length - 1];
-              if (lastMessage?.type === 'tool-error') {
-                const { toolName, toolCallId, error, input } = lastMessage;
-                const serializableError = {
-                  cause: error,
-                  toolCallId: toolCallId,
-                  toolName: toolName,
-                  toolArgs: input,
-                };
+        await context.with(activeContext, async () => {
+          const result = streamText({
+            model: openai.chat('gpt-4o-mini'),
+            system: AGENT_SYSTEM_TEMPLATE,
+            messages: modelMessages,
+            tools: tools as any,
+            experimental_telemetry: {
+              isEnabled: true,
+              functionId: 'assistant0-chat',
+            },
+            onFinish: (output) => {
+              if (output.finishReason === 'tool-calls') {
+                const lastMessage = output.content[output.content.length - 1];
+                if (lastMessage?.type === 'tool-error') {
+                  const { toolName, toolCallId, error, input } = lastMessage;
+                  const serializableError = {
+                    cause: error,
+                    toolCallId: toolCallId,
+                    toolName: toolName,
+                    toolArgs: input,
+                  };
 
-                throw serializableError;
+                  throw serializableError;
+                }
               }
-            }
-          },
-        });
+            },
+          });
 
-        writer.merge(
-          result.toUIMessageStream({
-            sendReasoning: true,
-          }),
-        );
+          await writer.merge(
+            result.toUIMessageStream({
+              sendReasoning: true,
+            }),
+          );
+        });
       },
       {
         messages: messages,
