@@ -6,15 +6,6 @@ These packages require manual migration work before upgrading. Each entry notes 
 
 ## HIGH EFFORT
 
-### `zod` 3.x → 4.x
-- **Breaking**: Error customization API overhauled; `.catch()`/`.default()` behavior on optional object keys changed.
-- **Impact**: Schema definitions used throughout tools, RAG pipeline, and form validation. `drizzle-zod` and `zod-to-json-schema` both need v4-compatible releases simultaneously.
-- **Work**:
-  - Audit every `z.object()`/`.parse()`/`.safeParse()` call across `src/`
-  - Update error handling where Zod error shapes are inspected
-  - Upgrade `drizzle-zod` to `^0.8.x` (already uses Zod v4 types)
-  - Upgrade `zod-to-json-schema` to its Zod v4-compatible release
-
 ### `next` 15.x → 16.x
 - `eslint-config-next` and `@next/bundle-analyzer` must be bumped to 16.x in lockstep.
 - **Work**:
@@ -35,6 +26,5 @@ These packages require manual migration work before upgrading. Each entry notes 
 
 ## Notes
 
-- `drizzle-zod` upgrade is **blocked on zod 3 → 4** migration (drizzle-zod@0.8.x uses Zod v4 types).
 - `eslint` + `eslint-config-next` upgrades are **blocked on next 15 → 16** migration.
 - All other packages listed above are fully independent and can be tackled in any order.
