@@ -72,8 +72,8 @@ export const createTasksTool = withTasks(
     inputSchema: z.object({
       title: z.string().describe('Title of the task'),
       notes: z.string().optional().describe('Notes or description of the task'),
-      due: z.coerce
-        .date()
+      due: z
+        .string()
         .optional()
         .describe('Due date of the task in ISO 8601 format (e.g., "2024-12-31"). Time information will be ignored.'),
     }),

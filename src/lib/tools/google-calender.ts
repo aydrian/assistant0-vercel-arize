@@ -11,9 +11,10 @@ export const getCalendarEventsTool = withCalendar(
   tool({
     description: `Get calendar events for a given date from the user's Google Calendar`,
     inputSchema: z.object({
-      date: z.coerce.date(),
+      date: z.string().describe('ISO 8601 date string, e.g. "2024-12-31"'),
     }),
     execute: async ({ date }) => {
+      const dateObj = new Date(date);
       // Get the access token from Auth0 AI
       const accessToken = await getAccessToken();
 
@@ -30,8 +31,8 @@ export const getCalendarEventsTool = withCalendar(
         const response = await calendar.events.list({
           auth,
           calendarId: 'primary',
-          timeMin: formatISO(startOfDay(date)),
-          timeMax: formatISO(endOfDay(date)),
+          timeMin: formatISO(startOfDay(dateObj)),
+          timeMax: formatISO(endOfDay(dateObj)),
           singleEvents: true,
           orderBy: 'startTime',
           maxResults: 50,
@@ -40,7 +41,7 @@ export const getCalendarEventsTool = withCalendar(
         const events = response.data.items || [];
 
         return {
-          date: formatISO(date, { representation: 'date' }),
+          date: formatISO(dateObj, { representation: 'date' }),
           eventsCount: events.length,
           events: events.map((event) => ({
             id: event.id,
