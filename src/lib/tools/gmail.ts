@@ -24,7 +24,7 @@ export const gmailSearchTool = withGmailRead(
     }),
     execute: async (args) => {
       try {
-        return await gmailSearch._call(args);
+        return await gmailSearch.invoke(args);
       } catch (error) {
         if (error instanceof Error && error.message === 'No messages returned from Gmail') {
           return `No emails found matching the query: "${args.query}"`;
@@ -48,8 +48,7 @@ export const gmailDraftTool = withGmailWrite(
       bcc: z.array(z.string()).optional(),
     }),
     execute: async (args) => {
-      const result = await gmailDraft._call(args);
-      return result;
+      return await gmailDraft.invoke(args);
     },
   }),
 );

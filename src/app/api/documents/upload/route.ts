@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pdf from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 
 import { createDocument } from '@/lib/actions/documents';
 
@@ -72,8 +72,10 @@ const extractFileContent = async (file: File): Promise<[string | null, Buffer | 
   const fileBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(fileBuffer);
   if (file.type === 'application/pdf') {
-    const data = await pdf(buffer);
-    return [data.text, buffer];
+    const parser = new PDFParse({ data: buffer });
+    const result = await parser.getText();
+    await parser.destroy();
+    return [result.text, buffer];
   } else if (file.type === 'text/plain' || file.type === 'text/markdown') {
     return [buffer.toString('utf-8'), buffer];
   }

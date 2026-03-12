@@ -20,7 +20,7 @@ function ChatMessages(props: {
   className?: string;
 }) {
   return (
-    <div className="flex flex-col max-w-[768px] mx-auto pb-12 w-full">
+    <div className="flex flex-col max-w-3xl mx-auto pb-12 w-full">
       {props.messages.map((m, i) => {
         return <ChatMessageBubble key={m.id} message={m} aiEmoji={props.aiEmoji} />;
       })}
@@ -58,7 +58,7 @@ function ChatInput(props: {
       }}
       className={cn('flex w-full flex-col', props.className)}
     >
-      <div className="border border-input bg-background rounded-lg flex flex-col gap-2 max-w-[768px] w-full mx-auto">
+      <div className="border border-input bg-background rounded-lg flex flex-col gap-2 max-w-3xl w-full mx-auto">
         <input
           value={props.value}
           placeholder={props.placeholder}
@@ -79,30 +79,6 @@ function ChatInput(props: {
         </div>
       </div>
     </form>
-  );
-}
-
-function StickyToBottomContent(props: {
-  content: ReactNode;
-  footer?: ReactNode;
-  className?: string;
-  contentClassName?: string;
-}) {
-  const context = useStickToBottomContext();
-
-  // scrollRef will also switch between overflow: unset to overflow: auto
-  return (
-    <div
-      ref={context.scrollRef}
-      style={{ width: '100%', height: '100%' }}
-      className={cn('flex flex-col', props.className)}
-    >
-      <div ref={context.contentRef} className={cn('flex-1 min-h-0', props.contentClassName)}>
-        {props.content}
-      </div>
-
-      {props.footer}
-    </div>
   );
 }
 
@@ -140,35 +116,30 @@ export function ChatWindow(props: {
   }
 
   return (
-    <StickToBottom>
-      <StickyToBottomContent
-        className="absolute inset-0"
-        contentClassName="py-8 px-2"
-        content={
-          messages.length === 0 ? (
-            <div>{props.emptyStateComponent}</div>
-          ) : (
-            <>
-              <ChatMessages aiEmoji={props.emoji} messages={messages} emptyStateComponent={props.emptyStateComponent} />
-              <div className="flex flex-col max-w-[768px] mx-auto pb-12 w-full">
-                <TokenVaultInterruptHandler interrupt={toolInterrupt} />
-              </div>
-            </>
-          )
-        }
-        footer={
-          <div className="sticky bottom-8 px-2">
-            <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
-            <ChatInput
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onSubmit={onSubmit}
-              loading={isChatLoading}
-              placeholder={props.placeholder ?? 'What can I help you with?'}
-            ></ChatInput>
-          </div>
-        }
-      ></StickyToBottomContent>
+    <StickToBottom className="absolute inset-0">
+      <StickToBottom.Content className="py-8 px-2">
+        {messages.length === 0 ? (
+          <div>{props.emptyStateComponent}</div>
+        ) : (
+          <>
+            <ChatMessages aiEmoji={props.emoji} messages={messages} emptyStateComponent={props.emptyStateComponent} />
+            <div className="flex flex-col max-w-3xl mx-auto pb-12 w-full">
+              <TokenVaultInterruptHandler interrupt={toolInterrupt} />
+            </div>
+          </>
+        )}
+      </StickToBottom.Content>
+
+      <div className="sticky bottom-8 px-2">
+        <ScrollToBottom className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4" />
+        <ChatInput
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onSubmit={onSubmit}
+          loading={isChatLoading}
+          placeholder={props.placeholder ?? 'What can I help you with?'}
+        ></ChatInput>
+      </div>
     </StickToBottom>
   );
 }

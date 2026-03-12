@@ -14,7 +14,7 @@ if (process.env.SERPAPI_API_KEY) {
       q: z.string(),
     }),
     execute: async ({ q }) => {
-      return await serpApi._call(q);
+      return await serpApi.invoke(q);
     },
   });
 }
