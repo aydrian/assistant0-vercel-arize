@@ -56,7 +56,7 @@ export default function UserButton({
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex gap-3">
             <Avatar className="h-8 w-8">

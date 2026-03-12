@@ -95,9 +95,9 @@ function StickyToBottomContent(props: {
     <div
       ref={context.scrollRef}
       style={{ width: '100%', height: '100%' }}
-      className={cn('grid grid-rows-[1fr,auto]', props.className)}
+      className={cn('flex flex-col', props.className)}
     >
-      <div ref={context.contentRef} className={props.contentClassName}>
+      <div ref={context.contentRef} className={cn('flex-1 min-h-0', props.contentClassName)}>
         {props.content}
       </div>
 

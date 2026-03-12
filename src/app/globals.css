@@ -71,14 +71,37 @@
 }
 
 /* ─── Layout utilities ───────────────────────────────────────────────────── */
-@utility v-stack         { display: flex; flex-direction: column; }
-@utility h-stack         { display: flex; flex-direction: row; }
-@utility v-stack-reverse { display: flex; flex-direction: column-reverse; }
-@utility h-stack-reverse { display: flex; flex-direction: row-reverse; }
-@utility center          { display: flex; align-items: center; justify-content: center; }
-@utility spacer          { flex: 1; }
-@utility circle          { aspect-ratio: 1 / 1; }
-@utility z-stack         { display: grid; }
+@utility v-stack {
+  @apply flex flex-col;
+}
+
+@utility h-stack {
+  @apply flex flex-row;
+}
+
+@utility v-stack-reverse {
+  @apply flex flex-col-reverse;
+}
+
+@utility h-stack-reverse {
+  @apply flex flex-row-reverse;
+}
+
+@utility center {
+  @apply flex items-center justify-center;
+}
+
+@utility spacer {
+  flex: 1;
+}
+
+@utility circle {
+  aspect-ratio: 1 / 1;
+}
+
+@utility z-stack {
+  display: grid;
+}
 
 /* ─── Base styles ────────────────────────────────────────────────────────── */
 @layer base {

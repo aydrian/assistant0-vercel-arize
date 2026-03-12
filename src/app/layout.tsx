@@ -35,26 +35,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className={publicSans.className}>
         <NuqsAdapter>
-          <div className="bg-secondary grid grid-rows-[auto,1fr] h-dvh">
-            <div className="grid grid-cols-[1fr,auto] gap-2 p-4 bg-black/25">
-              <div className="v-stack md:h-stack gap-4 md:items-center">
+          <div className="bg-secondary flex flex-col h-dvh">
+            <div className="flex items-center gap-2 p-4 bg-black/25">
+              <div className="flex-1 flex gap-4 flex-col md:flex-row md:items-center">
                 <a
                   href="https://a0.to/ai-event"
                   rel="noopener noreferrer"
                   target="_blank"
-                  className="h-stack items-center gap-2 px-4"
+                  className="flex items-center gap-2 px-4"
                 >
                   <Image src="/images/auth0-logo.svg" alt="Auth0 AI Logo" className="h-8" width={143} height={32} />
                 </a>
                 <span className={`${robotoMono.className} text-white text-2xl`}>Assistant0</span>
-                <nav className="v-stack md:h-stack gap-1">
+                <nav className="flex gap-1 flex-col md:flex-row">
                   <ActiveLink href="/">Chat</ActiveLink>
                   <ActiveLink href="/documents">Documents</ActiveLink>
                 </nav>
               </div>
-              <div className="h-stack justify-center">
+              <div className="flex justify-center">
                 {session && (
-                  <div className="h-stack items-center gap-2 px-4 text-white">
+                  <div className="flex items-center gap-2 px-4 text-white">
                     <UserButton user={session?.user!} logoutUrl="/auth/logout" />
                   </div>
                 )}
@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </Button>
               </div>
             </div>
-            <div className="gradient-up bg-linear-to-b from-white/10 to-white/0 relative grid border-input border-b-0">
+            <div className="gradient-up bg-linear-to-b from-white/10 to-white/0 relative flex-1 border-input border-b-0">
               <div className="absolute inset-0">{children}</div>
             </div>
           </div>

@@ -93,7 +93,7 @@ export default function ConnectedAccountsCard({
                             {account.scopes.map((scope) => (
                               <span
                                 key={scope}
-                                className="text-xs bg-white/10 px-2 py-0.5 rounded text-white/80 border border-white/5 truncate max-w-[250px]"
+                                className="text-xs bg-white/10 px-2 py-0.5 rounded text-white/80 border border-white/5 truncate max-w-62.5"
                                 title={scope}
                               >
                                 {scope}
@@ -117,7 +117,7 @@ export default function ConnectedAccountsCard({
           {/* Information Box */}
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mt-6">
             <div className="h-stack items-start space-x-3">
-              <ExternalLink className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <ExternalLink className="h-5 w-5 text-blue-400 shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="text-blue-100 font-medium mb-1">
                   <a
