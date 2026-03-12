@@ -14,6 +14,7 @@ import type { ExportResult } from '@opentelemetry/core';
 import type { ReadableSpan, Span, SpanExporter } from '@opentelemetry/sdk-trace-base';
 import { getSession, getUser } from '@arizeai/openinference-core';
 import { SESSION_ID, USER_ID } from '@arizeai/openinference-semantic-conventions';
+import { RootAwareOpenInferenceProcessor } from './utils/root-aware-processor';
 
 // Captures OTLP export errors and OTel pipeline warnings
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.WARN);
@@ -37,6 +38,29 @@ class SessionUserSpanProcessor {
     return Promise.resolve();
   }
   forceFlush() {
+    return Promise.resolve();
+  }
+}
+
+// Workaround for ai@6.x bug: experimental_telemetry passes performance.now()
+// (ms since process start) to span.end() instead of Date.now() (Unix epoch ms).
+// OTel interprets the small value as a Unix ms timestamp → endTime ≈ [2, ...],
+// producing the "startTime > endTime" warning and 0ms span durations in Arize.
+// This processor corrects the endTime to wall-clock time before export.
+class FixSpanTimingProcessor {
+  onStart(_span: Span, _parentContext: Context): void {}
+  onEnd(span: ReadableSpan): void {
+    const [endSecs] = span.endTime;
+    const [startSecs] = span.startTime;
+    if (endSecs < startSecs) {
+      const nowMs = Date.now();
+      (span as any)._endTime = [Math.floor(nowMs / 1000), (nowMs % 1000) * 1_000_000];
+    }
+  }
+  shutdown(): Promise<void> {
+    return Promise.resolve();
+  }
+  forceFlush(): Promise<void> {
     return Promise.resolve();
   }
 }
@@ -80,7 +104,20 @@ export function register() {
       },
       spanProcessors: [
         new SessionUserSpanProcessor(),
-        new OpenInferenceSimpleSpanProcessor({
+        // new OpenInferenceSimpleSpanProcessor({
+        //   exporter: new LoggingExporter(
+        //     new OTLPTraceExporter({
+        //       url: 'https://otlp.arize.com/v1/traces',
+        //       headers: {
+        //         space_id: process.env.ARIZE_SPACE_ID ?? '',
+        //         api_key: process.env.ARIZE_API_KEY ?? '',
+        //       },
+        //     }),
+        //   ),
+        //   spanFilter: isOpenInferenceSpan,
+        // }),
+        new FixSpanTimingProcessor(), // ← new: fix endTime before export
+        new RootAwareOpenInferenceProcessor({ // New processor
           exporter: new LoggingExporter(
             new OTLPTraceExporter({
               url: 'https://otlp.arize.com/v1/traces',
@@ -90,7 +127,6 @@ export function register() {
               },
             }),
           ),
-          spanFilter: isOpenInferenceSpan,
         }),
       ],
     });
