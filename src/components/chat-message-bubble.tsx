@@ -39,7 +39,7 @@ function getToolCallsFromMessage(message: UIMessage): Array<{
     // Check if this part is a tool call (starts with "tool-")
     if (part?.type && part.type.startsWith('tool-') && part.toolCallId) {
       const toolName = part.type.replace('tool-', '');
-      
+
       // Determine status based on available information
       let status: 'pending' | 'complete' | 'error' = 'pending';
       if (part.state === 'output-available' || part.output !== undefined) {
@@ -47,13 +47,13 @@ function getToolCallsFromMessage(message: UIMessage): Array<{
       } else if (part.state === 'error' || part.isError) {
         status = 'error';
       }
-      
+
       toolCalls.push({
         toolCallId: part.toolCallId,
         toolName,
         args: part.input || part.args || {},
         result: part.output || part.result,
-        status
+        status,
       });
     }
   });
@@ -61,14 +61,16 @@ function getToolCallsFromMessage(message: UIMessage): Array<{
   return toolCalls;
 }
 
-function ToolCallDisplay({ toolCall }: { 
+function ToolCallDisplay({
+  toolCall,
+}: {
   toolCall: {
     toolCallId: string;
     toolName: string;
     args: any;
     result?: any;
     status: 'pending' | 'complete' | 'error';
-  }
+  };
 }) {
   const { toolName, args, result, status } = toolCall;
 
@@ -125,13 +127,13 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
   return (
     <div
       className={cn(
-        'rounded-[24px] max-w-[80%] mb-8 flex',
+        'rounded-3xl max-w-[80%] mb-8 flex',
         message.role === 'user' ? 'bg-secondary text-secondary-foreground px-4 py-2' : null,
         message.role === 'user' ? 'ml-auto' : 'mr-auto',
       )}
     >
       {message.role !== 'user' && (
-        <div className="mr-4 -mt-2 mt-1 border bg-secondary rounded-full w-10 h-10 flex-shrink-0 flex items-center justify-center">
+        <div className="mr-4 -mt-2 border bg-secondary rounded-full w-10 h-10 shrink-0 flex items-center justify-center">
           {aiEmoji}
         </div>
       )}
@@ -145,7 +147,7 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
             ))}
           </div>
         )}
-        
+
         {/* Render text content if present */}
         {text && <MemoizedMarkdown content={text} id={message.id as any} />}
       </div>

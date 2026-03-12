@@ -101,7 +101,7 @@ export default function DocumentItemActions({ doc, onActionComplete }: DocumentI
             Share
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Share {doc.fileName}</DialogTitle>
             <DialogDescription>
