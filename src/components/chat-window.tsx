@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, useMemo, type FormEvent, type ReactNode } from 'react';
 import { type UIMessage, DefaultChatTransport, generateId, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { toast } from 'sonner';
@@ -112,10 +112,13 @@ export function ChatWindow(props: {
   placeholder?: string;
   emoji?: string;
 }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const transport = useMemo(() => new DefaultChatTransport({ api: props.endpoint }), [props.endpoint]);
+
   const { messages, sendMessage, status, toolInterrupt } = useInterruptions((handler) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useChat({
-      transport: new DefaultChatTransport({ api: props.endpoint }),
+      transport,
       generateId,
       onError: handler((e: Error) => {
         console.error('Error: ', e);

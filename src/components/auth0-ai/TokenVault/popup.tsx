@@ -33,7 +33,7 @@ export function TokenVaultConsentPopup({
           resume();
         }
       }
-    }, 1000);
+    }, 2000);
     return () => {
       if (interval) {
         clearInterval(interval);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import UserInfoCard from './user-info-card';
 import ConnectedAccountsCard from './connected-accounts-card';
@@ -10,18 +10,20 @@ interface KeyValueMap {
   [key: string]: any;
 }
 
-export default function ProfileContent({ user }: { user: KeyValueMap }) {
-  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadConnectedAccounts();
-  }, []);
+export default function ProfileContent({
+  user,
+  initialAccounts,
+}: {
+  user: KeyValueMap;
+  initialAccounts: ConnectedAccount[];
+}) {
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>(initialAccounts);
+  const [loading, setLoading] = useState(false);
 
   const loadConnectedAccounts = async () => {
+    setLoading(true);
     try {
       const accounts = await fetchConnectedAccounts();
-      console.log('Fetched Linked Accounts:', accounts);
       setConnectedAccounts(accounts);
     } catch (error) {
       console.error('Error fetching linked accounts:', error);

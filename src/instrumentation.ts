@@ -26,9 +26,11 @@ class SessionUserSpanProcessor {
     const user = getUser(parentContext);
     if (session?.sessionId) span.setAttribute(SESSION_ID, session.sessionId);
     if (user?.userId) span.setAttribute(USER_ID, user.userId);
-    console.log(
-      `[Arize] span started: "${span.name}" — session: ${session?.sessionId ?? 'MISSING'}, user: ${user?.userId ?? 'MISSING'}`,
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        `[Arize] span started: "${span.name}" — session: ${session?.sessionId ?? 'MISSING'}, user: ${user?.userId ?? 'MISSING'}`,
+      );
+    }
   }
   onEnd(_span: ReadableSpan) {}
   shutdown() {
@@ -42,14 +44,16 @@ class SessionUserSpanProcessor {
 class LoggingExporter implements SpanExporter {
   constructor(private inner: SpanExporter) {}
   export(spans: ReadableSpan[], cb: (result: ExportResult) => void) {
-    console.log(
-      `[Arize] exporting ${spans.length} span(s):`,
-      spans.map((s) => s.name),
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        `[Arize] exporting ${spans.length} span(s):`,
+        spans.map((s) => s.name),
+      );
+    }
     this.inner.export(spans, (result) => {
       if (result.error) {
         console.error('[Arize] export FAILED:', result.error);
-      } else {
+      } else if (process.env.NODE_ENV !== 'production') {
         console.log('[Arize] export SUCCESS');
       }
       cb(result);

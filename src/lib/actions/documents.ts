@@ -11,38 +11,39 @@ import { db } from '@/lib/db';
 import { generateEmbeddings } from '@/lib/rag/embedding';
 import { embeddings as embeddingsTable } from '@/lib/db/schema/embeddings';
 import { addRelation, deleteRelation } from '@/lib/fga/fga';
-import { auth0 } from '@/lib/auth0';
+import { getSession } from '@/lib/auth0';
 
 export const createDocument = async (input: NewDocumentParams, text: string) => {
-  const session = await auth0.getSession();
+  const session = await getSession();
   const user = session?.user!;
   const { content, fileName, fileType, sharedWith } = insertDocumentSchema.parse(input);
 
-  const [document] = await db
-    .insert(documentsTable)
-    .values({ content, fileName, fileType, userId: user.sub, userEmail: user.email!, sharedWith })
-    .returning();
-
-  const embeddings = await generateEmbeddings(text);
+  const [[document], embeddings] = await Promise.all([
+    db
+      .insert(documentsTable)
+      .values({ content, fileName, fileType, userId: user.sub, userEmail: user.email!, sharedWith })
+      .returning(),
+    generateEmbeddings(text),
+  ]);
 
   if (embeddings.length > 0) {
-    await db.insert(embeddingsTable).values(
-      embeddings.map((embedding) => ({
-        fileName,
-        documentId: document.id,
-        ...embedding,
-      })),
-    );
-
-    // write the relationship tuples to FGA
-    await addRelation(user.email!, document.id);
+    await Promise.all([
+      db.insert(embeddingsTable).values(
+        embeddings.map((embedding) => ({
+          fileName,
+          documentId: document.id,
+          ...embedding,
+        })),
+      ),
+      addRelation(user.email!, document.id),
+    ]);
   }
 
   return true;
 };
 
 export async function getDocumentsForUser(): Promise<Omit<DocumentParams, 'content'>[]> {
-  const session = await auth0.getSession();
+  const session = await getSession();
   const user = session?.user!;
   try {
     const userDocuments = await db
@@ -88,26 +89,24 @@ export async function shareDocument(documentId: string, sharedWith: string[]) {
     .where(eq(documentsTable.id, documentId));
   const mergedSharedWith = [...currentSharedWith[0]?.sharedWith, ...sharedWith];
   await db.update(documentsTable).set({ sharedWith: mergedSharedWith }).where(eq(documentsTable.id, documentId));
-  // write the relationship tuples to FGA
-  for (const user of sharedWith) {
-    await addRelation(user, documentId, 'viewer');
-  }
+  // write the relationship tuples to FGA in parallel
+  await Promise.all(sharedWith.map((user) => addRelation(user, documentId, 'viewer')));
 }
 
 export async function deleteDocument(documentId: string) {
-  const session = await auth0.getSession();
+  const session = await getSession();
   const user = session?.user!;
-  // delete the relationship tuples from FGA
-  await deleteRelation(user.email!, documentId);
-  const currentSharedWith = await db
-    .select({ sharedWith: documentsTable.sharedWith })
-    .from(documentsTable)
-    .where(eq(documentsTable.id, documentId));
-  // delete the relationship tuples from FGA
-  for (const sUser of currentSharedWith[0]?.sharedWith) {
-    await deleteRelation(sUser, documentId, 'viewer');
-  }
+  // fetch sharedWith list and delete owner's FGA tuple in parallel
+  const [, currentSharedWith] = await Promise.all([
+    deleteRelation(user.email!, documentId),
+    db
+      .select({ sharedWith: documentsTable.sharedWith })
+      .from(documentsTable)
+      .where(eq(documentsTable.id, documentId)),
+  ]);
 
-  // delete the document from the database
+  // delete all shared-user FGA tuples in parallel, then delete the document
+  const sharedWithList: string[] = currentSharedWith[0]?.sharedWith ?? [];
+  await Promise.all(sharedWithList.map((sUser) => deleteRelation(sUser, documentId, 'viewer')));
   await db.delete(documentsTable).where(eq(documentsTable.id, documentId));
 }

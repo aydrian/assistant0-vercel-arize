@@ -25,7 +25,7 @@ ANALYZE=true npm run build    # Interactive bundle analysis
 ## Architecture
 
 ### Overview
-Assistant0 is a Next.js 15 App Router app — an AI personal assistant secured with Auth0. The agent uses Vercel AI SDK's `streamText` with tool calling (gpt-4o-mini) to provide Gmail, Google Calendar, Google Tasks, GitHub, Slack, web search, RAG, and online shopping capabilities.
+Assistant0 is a Next.js 15 App Router app — an AI personal assistant secured with Auth0. The agent uses Vercel AI SDK's `streamText` with tool calling (gpt-5-mini) to provide Gmail, Google Calendar, Google Tasks, GitHub, Slack, web search, RAG, and online shopping capabilities.
 
 ### Request Flow
 1. [src/middleware.ts](src/middleware.ts) — Auth0 middleware secures all routes; unauthenticated requests redirect to `/auth/login`

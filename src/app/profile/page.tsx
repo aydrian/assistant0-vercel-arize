@@ -1,16 +1,17 @@
-import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
 
-import { auth0 } from '@/lib/auth0';
+import { getSession } from '@/lib/auth0';
+import { fetchConnectedAccounts } from '@/lib/actions/profile';
 import ProfileContent from '@/components/auth0/profile/profile-content';
 
 export default async function ProfilePage() {
-  const session = await auth0.getSession();
+  const session = await getSession();
 
   if (!session || !session.user) {
     redirect('/auth/login');
   }
+
+  const initialAccounts = await fetchConnectedAccounts();
 
   return (
     <div className="min-h-full bg-white/5">
@@ -20,15 +21,7 @@ export default async function ProfilePage() {
           <p className="text-white/70">Manage your connected accounts</p>
         </div>
 
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center min-h-[400px]">
-              <Loader2 className="h-8 w-8 animate-spin text-white/60" />
-            </div>
-          }
-        >
-          <ProfileContent user={session.user} />
-        </Suspense>
+        <ProfileContent user={session.user} initialAccounts={initialAccounts} />
       </div>
     </div>
   );
