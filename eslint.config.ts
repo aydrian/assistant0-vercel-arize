@@ -1,3 +1,4 @@
+import type { Linter } from "eslint";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 
 export default [
@@ -7,4 +8,4 @@ export default [
       react: { version: "19" },
     },
   },
-];
+] satisfies Linter.Config[];
