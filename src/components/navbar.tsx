@@ -12,7 +12,7 @@ export const ActiveLink = (props: { href: string; children: ReactNode }) => {
     <Link
       href={props.href}
       className={cn(
-        'px-4 py-2 rounded-[18px] whitespace-nowrap flex items-center gap-2 text-sm transition-all',
+        'px-4 py-2 rounded-[18px] whitespace-nowrap h-stack items-center gap-2 text-sm transition-all',
         pathname === props.href && 'bg-primary text-primary-foreground',
       )}
     >

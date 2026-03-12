@@ -40,13 +40,13 @@ export default function ConnectedAccountsCard({
   };
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="h-stack items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-white">Connected Accounts</h2>
         <span className="text-sm text-white/60">{connectedAccounts.length} connected</span>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-8">
+        <div className="center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-white/60" />
         </div>
       ) : (
@@ -58,10 +58,10 @@ export default function ConnectedAccountsCard({
                 return (
                   <div
                     key={account.id}
-                    className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
+                    className="h-stack items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
                   >
                     <div className="flex-1">
-                      <div className="flex items-center justify-between">
+                      <div className="h-stack items-center justify-between">
                         <p className="text-sm font-medium text-white">{account.connection}</p>
                         <button
                           onClick={() => handleDelete(account.id)}
@@ -76,7 +76,7 @@ export default function ConnectedAccountsCard({
                           )}
                         </button>
                       </div>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="h-stack items-center justify-between mb-2">
                         <div className="flex gap-4 text-xs text-white/60">
                           {account.created_at && (
                             <span>Created: {format(new Date(account.created_at), 'dd-MMM-yy HH:mm')}</span>
@@ -87,7 +87,7 @@ export default function ConnectedAccountsCard({
                         </div>
                       </div>
                       {account.scopes && account.scopes.length > 0 && (
-                        <div className="flex items-center gap-2">
+                        <div className="h-stack items-center gap-2">
                           <span className="text-xs text-white/60">Scopes:</span>
                           <div className="flex flex-wrap gap-1.5">
                             {account.scopes.map((scope) => (
@@ -116,7 +116,7 @@ export default function ConnectedAccountsCard({
 
           {/* Information Box */}
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mt-6">
-            <div className="flex items-start space-x-3">
+            <div className="h-stack items-start space-x-3">
               <ExternalLink className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
                 <p className="text-blue-100 font-medium mb-1">

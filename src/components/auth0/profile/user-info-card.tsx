@@ -25,7 +25,7 @@ function getAvatarFallback(user: KeyValueMap) {
 export default function UserInfoCard({ user }: { user: KeyValueMap }) {
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
-      <div className="flex flex-col items-center space-y-4">
+      <div className="v-stack items-center space-y-4">
         {/* Avatar */}
         <Avatar className="h-24 w-24">
           <AvatarImage src={user.picture} alt={user.name} />
@@ -38,7 +38,7 @@ export default function UserInfoCard({ user }: { user: KeyValueMap }) {
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-semibold text-white">{user.name || user.nickname || 'User'}</h2>
           {user.email && (
-            <p className="text-white/70 flex items-center gap-2 justify-center">
+            <p className="text-white/70 h-stack items-center gap-2 justify-center">
               <Mail className="h-4 w-4" />
               {user.email}
               {user.email_verified && (
@@ -58,7 +58,7 @@ export default function UserInfoCard({ user }: { user: KeyValueMap }) {
 
           <div className="space-y-3 text-sm">
             {user.sub && (
-              <div className="flex items-center gap-2">
+              <div className="h-stack items-center gap-2">
                 <User className="h-4 w-4 text-white/60" />
                 <span className="text-white/80">User ID:</span>
                 <span className="text-white">{user.sub}</span>
@@ -66,7 +66,7 @@ export default function UserInfoCard({ user }: { user: KeyValueMap }) {
             )}
 
             {user.given_name && (
-              <div className="flex items-center gap-2">
+              <div className="h-stack items-center gap-2">
                 <User className="h-4 w-4 text-white/60" />
                 <span className="text-white/80">First Name:</span>
                 <span className="text-white">{user.given_name}</span>
@@ -74,7 +74,7 @@ export default function UserInfoCard({ user }: { user: KeyValueMap }) {
             )}
 
             {user.family_name && (
-              <div className="flex items-center gap-2">
+              <div className="h-stack items-center gap-2">
                 <User className="h-4 w-4 text-white/60" />
                 <span className="text-white/80">Last Name:</span>
                 <span className="text-white">{user.family_name}</span>
@@ -82,7 +82,7 @@ export default function UserInfoCard({ user }: { user: KeyValueMap }) {
             )}
 
             {user.nickname && (
-              <div className="flex items-center gap-2">
+              <div className="h-stack items-center gap-2">
                 <Globe className="h-4 w-4 text-white/60" />
                 <span className="text-white/80">Nickname:</span>
                 <span className="text-white">{user.nickname}</span>
@@ -90,7 +90,7 @@ export default function UserInfoCard({ user }: { user: KeyValueMap }) {
             )}
 
             {user.org_id && (
-              <div className="flex items-center gap-2">
+              <div className="h-stack items-center gap-2">
                 <Globe className="h-4 w-4 text-white/60" />
                 <span className="text-white/80">Organization ID:</span>
                 <span className="text-white">{user.org_id}</span>

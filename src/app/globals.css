@@ -1,58 +1,91 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 215 20.2% 65.1%;
-    --radius: 0.5rem;
-  }
+/* Class-based dark mode — applies when an ancestor has .dark */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
-    --secondary: 222.2 47.4% 11.2%;
-    --secondary-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 216 34% 17%;
-  }
+/* ─── Theme (replaces tailwind.config.js theme.extend) ─────────────────── */
+@theme {
+  /* Colors — light mode defaults */
+  --color-background:             hsl(0 0% 100%);
+  --color-foreground:             hsl(222.2 47.4% 11.2%);
+  --color-border:                 hsl(214.3 31.8% 91.4%);
+  --color-input:                  hsl(214.3 31.8% 91.4%);
+  --color-ring:                   hsl(215 20.2% 65.1%);
+
+  --color-primary:                hsl(222.2 47.4% 11.2%);
+  --color-primary-foreground:     hsl(210 40% 98%);
+
+  --color-secondary:              hsl(210 40% 96.1%);
+  --color-secondary-foreground:   hsl(222.2 47.4% 11.2%);
+
+  --color-muted:                  hsl(210 40% 96.1%);
+  --color-muted-foreground:       hsl(215.4 16.3% 46.9%);
+
+  --color-accent:                 hsl(210 40% 96.1%);
+  --color-accent-foreground:      hsl(222.2 47.4% 11.2%);
+
+  --color-destructive:            hsl(0 100% 50%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+
+  --color-card:                   hsl(0 0% 100%);
+  --color-card-foreground:        hsl(222.2 47.4% 11.2%);
+
+  --color-popover:                hsl(0 0% 100%);
+  --color-popover-foreground:     hsl(222.2 47.4% 11.2%);
+
+  /* Border radius */
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
 }
 
+/* ─── Dark mode token overrides ─────────────────────────────────────────── */
+.dark {
+  --color-background:             hsl(224 71% 4%);
+  --color-foreground:             hsl(213 31% 91%);
+  --color-border:                 hsl(216 34% 17%);
+  --color-input:                  hsl(216 34% 17%);
+  --color-ring:                   hsl(216 34% 17%);
+
+  --color-primary:                hsl(210 40% 98%);
+  --color-primary-foreground:     hsl(222.2 47.4% 1.2%);
+
+  --color-secondary:              hsl(222.2 47.4% 11.2%);
+  --color-secondary-foreground:   hsl(210 40% 98%);
+
+  --color-muted:                  hsl(223 47% 11%);
+  --color-muted-foreground:       hsl(215.4 16.3% 56.9%);
+
+  --color-accent:                 hsl(216 34% 17%);
+  --color-accent-foreground:      hsl(210 40% 98%);
+
+  --color-destructive:            hsl(0 63% 31%);
+  --color-destructive-foreground: hsl(210 40% 98%);
+
+  --color-card:                   hsl(224 71% 4%);
+  --color-card-foreground:        hsl(213 31% 91%);
+
+  --color-popover:                hsl(224 71% 4%);
+  --color-popover-foreground:     hsl(215 20.2% 65.1%);
+}
+
+/* ─── Layout utilities ───────────────────────────────────────────────────── */
+@utility v-stack         { display: flex; flex-direction: column; }
+@utility h-stack         { display: flex; flex-direction: row; }
+@utility v-stack-reverse { display: flex; flex-direction: column-reverse; }
+@utility h-stack-reverse { display: flex; flex-direction: row-reverse; }
+@utility center          { display: flex; align-items: center; justify-content: center; }
+@utility spacer          { flex: 1; }
+@utility circle          { aspect-ratio: 1 / 1; }
+@utility z-stack         { display: grid; }
+
+/* ─── Base styles ────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
