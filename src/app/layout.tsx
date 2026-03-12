@@ -20,7 +20,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const session = await auth0.getSession();
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <title>{TITLE}</title>
         <link rel="shortcut icon" type="image/svg+xml" href="/images/favicon.png" />
