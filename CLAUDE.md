@@ -19,16 +19,16 @@ npm run db:studio             # Open Drizzle Studio UI
 
 npm run fga:init     # Initialize Auth0 FGA store (run once after clone)
 
-ANALYZE=true npm run build    # Interactive bundle analysis
+ANALYZE=true next build --webpack    # Bundle analysis (requires --webpack; Turbopack is default in v16)
 ```
 
 ## Architecture
 
 ### Overview
-Assistant0 is a Next.js 15 App Router app — an AI personal assistant secured with Auth0. The agent uses Vercel AI SDK's `streamText` with tool calling (gpt-5-mini) to provide Gmail, Google Calendar, Google Tasks, GitHub, Slack, web search, RAG, and online shopping capabilities.
+Assistant0 is a Next.js 16 App Router app — an AI personal assistant secured with Auth0. The agent uses Vercel AI SDK's `streamText` with tool calling (gpt-5-mini) to provide Gmail, Google Calendar, Google Tasks, GitHub, Slack, web search, RAG, and online shopping capabilities.
 
 ### Request Flow
-1. [src/middleware.ts](src/middleware.ts) — Auth0 middleware secures all routes; unauthenticated requests redirect to `/auth/login`
+1. [src/proxy.ts](src/proxy.ts) — Auth0 proxy secures all routes; unauthenticated requests redirect to `/auth/login`
 2. [src/app/page.tsx](src/app/page.tsx) — Chat UI using `useChat` from `@ai-sdk/react`
 3. `POST /api/chat` ([src/app/api/chat/route.ts](src/app/api/chat/route.ts)) — Streams AI responses via `createUIMessageStream` + `streamText`; all tools are registered here
 

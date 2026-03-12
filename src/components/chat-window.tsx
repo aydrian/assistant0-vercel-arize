@@ -88,7 +88,6 @@ export function ChatWindow(props: {
   placeholder?: string;
   emoji?: string;
 }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const transport = useMemo(() => new DefaultChatTransport({ api: props.endpoint }), [props.endpoint]);
 
   const { messages, sendMessage, status, toolInterrupt } = useInterruptions((handler) =>

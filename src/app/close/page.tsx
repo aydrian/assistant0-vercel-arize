@@ -19,7 +19,8 @@ export default function PopupClosePage() {
   }, []);
 
   useEffect(() => {
-    // Attempt to close the window on load
+    // Attempt to close the window on load; setState in catch is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     handleClose();
   }, [handleClose]);
 
