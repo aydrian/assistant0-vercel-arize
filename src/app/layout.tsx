@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className={publicSans.className}>
         <NuqsAdapter>
-          <div className="bg-secondary flex flex-col h-dvh">
+          <div className="bg-secondary flex flex-col h-dvh overflow-hidden">
             <div className="flex items-center gap-2 p-4 bg-black/25">
               <div className="flex-1 flex gap-4 flex-col md:flex-row md:items-center">
                 <a
@@ -67,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </div>
             </div>
             <div className="gradient-up bg-linear-to-b from-white/10 to-white/0 relative flex-1 border-input border-b-0">
-              <div className="absolute inset-0">{children}</div>
+              <div className="absolute inset-0 overflow-auto">{children}</div>
             </div>
           </div>
           <Toaster richColors />
