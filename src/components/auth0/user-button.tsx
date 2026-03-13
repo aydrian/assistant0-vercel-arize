@@ -78,15 +78,15 @@ export default function UserButton({
           </>
         )}
 
-        <DropdownMenuItem>
-          <a href="/profile" className="flex gap-2 items-center">
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <a href="/profile">
             <User />
             Profile
           </a>
         </DropdownMenuItem>
 
-        <DropdownMenuItem>
-          <a href={resolvedLogoutUrl} className="flex gap-2 items-center">
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <a href={resolvedLogoutUrl}>
             <LogOut />
             Log out
           </a>
