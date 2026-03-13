@@ -5,6 +5,24 @@ import { ConnectedAccount, deleteConnectedAccount } from '@/lib/actions/profile'
 import { format } from 'date-fns';
 import { useState } from 'react';
 
+const SCOPE_LABELS: Record<string, string> = {
+  'https://www.googleapis.com/auth/gmail.readonly': 'Gmail (read)',
+  'https://www.googleapis.com/auth/gmail.compose': 'Gmail (compose)',
+  'https://www.googleapis.com/auth/calendar.events': 'Calendar (events)',
+  'https://www.googleapis.com/auth/tasks': 'Tasks',
+  openid: 'OpenID',
+};
+
+function formatScope(scope: string): string {
+  if (SCOPE_LABELS[scope]) return SCOPE_LABELS[scope];
+  try {
+    const url = new URL(scope);
+    return url.pathname.replace(/^\/auth\//, '').replace(/^\//, '') || scope;
+  } catch {
+    return scope;
+  }
+}
+
 interface ConnectedAccountsCardProps {
   connectedAccounts: ConnectedAccount[];
   loading: boolean;
@@ -41,7 +59,7 @@ export default function ConnectedAccountsCard({
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 p-6">
       <div className="h-stack items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-white">Connected Accounts</h2>
+        <h2 className="text-xl font-semibold text-white">Token Vault Connections</h2>
         <span className="text-sm text-white/60">{connectedAccounts.length} connected</span>
       </div>
 
@@ -51,7 +69,6 @@ export default function ConnectedAccountsCard({
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Current Linked Accounts */}
           {connectedAccounts.length > 0 ? (
             <div className="space-y-3">
               {connectedAccounts.map((account) => {
@@ -96,7 +113,7 @@ export default function ConnectedAccountsCard({
                                 className="text-xs bg-white/10 px-2 py-0.5 rounded text-white/80 border border-white/5 truncate max-w-62.5"
                                 title={scope}
                               >
-                                {scope}
+                                {formatScope(scope)}
                               </span>
                             ))}
                           </div>
@@ -110,7 +127,7 @@ export default function ConnectedAccountsCard({
           ) : (
             <div className="text-center py-8">
               <UserPlus className="h-12 w-12 text-white/40 mx-auto mb-3" />
-              <p className="text-white/60">No additional accounts connected</p>
+              <p className="text-white/60">No Token Vault connections</p>
             </div>
           )}
 
@@ -125,12 +142,12 @@ export default function ConnectedAccountsCard({
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Connected Accounts
+                    Token Vault
                   </a>
                 </p>
                 <p className="text-blue-200/80 text-xs leading-relaxed">
-                  Connect social accounts to sign in with multiple providers using the same profile. Your primary
-                  account cannot be unlinked.
+                  Token Vault stores OAuth tokens for third-party APIs. These connections power the assistant&apos;s
+                  tools (Gmail, Calendar, Tasks, etc.) and can be revoked at any time.
                 </p>
               </div>
             </div>
