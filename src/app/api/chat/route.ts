@@ -12,7 +12,7 @@ import { openai } from '@ai-sdk/openai';
 import { setAIContext } from '@auth0/ai-vercel';
 import { errorSerializer, withInterruptions } from '@auth0/ai-vercel/interrupts';
 import { Auth0Interrupt } from '@auth0/ai/interrupts';
-import { context } from '@opentelemetry/api';
+import { context, trace } from '@opentelemetry/api';
 import { setSession, setUser } from '@arizeai/openinference-core';
 import { auth0 } from '@/lib/auth0';
 
@@ -107,6 +107,8 @@ export async function POST(req: NextRequest) {
               sendReasoning: true,
             }),
           );
+
+          await (trace.getTracerProvider() as any).forceFlush?.();
         });
       },
       {
