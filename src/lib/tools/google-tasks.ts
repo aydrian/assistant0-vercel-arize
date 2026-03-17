@@ -2,9 +2,11 @@ import { tool } from 'ai';
 import { GaxiosError } from 'gaxios';
 import { google } from 'googleapis';
 import { z } from 'zod';
-import { TokenVaultError } from '@auth0/ai/interrupts';
+import { TokenVaultInterrupt } from '@auth0/ai/interrupts';
 
-import { getAccessToken, withTasks } from '../auth0-ai';
+import { createGetAccessToken, withTasks } from '../auth0-ai';
+
+const getAccessToken = createGetAccessToken('google-oauth2', ['https://www.googleapis.com/auth/tasks']);
 
 export const getTasksTool = withTasks(
   tool({
@@ -56,7 +58,11 @@ export const getTasksTool = withTasks(
       } catch (error) {
         if (error instanceof GaxiosError) {
           if (error.status === 401) {
-            throw new TokenVaultError(`Authorization required to access the Token Vault connection.`);
+            throw new TokenVaultInterrupt(`Authorization required to access the Token Vault connection.`, {
+              connection: 'google-oauth2',
+              scopes: ['https://www.googleapis.com/auth/tasks'],
+              requiredScopes: ['https://www.googleapis.com/auth/tasks'],
+            });
           }
         }
 
@@ -105,7 +111,11 @@ export const createTasksTool = withTasks(
       } catch (error) {
         if (error instanceof GaxiosError) {
           if (error.status === 401) {
-            throw new TokenVaultError(`Authorization required to access the Token Vault connection.`);
+            throw new TokenVaultInterrupt(`Authorization required to access the Token Vault connection.`, {
+              connection: 'google-oauth2',
+              scopes: ['https://www.googleapis.com/auth/tasks'],
+              requiredScopes: ['https://www.googleapis.com/auth/tasks'],
+            });
           }
         }
 

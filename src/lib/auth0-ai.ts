@@ -1,9 +1,25 @@
 import { Auth0AI, getAccessTokenFromTokenVault } from '@auth0/ai-vercel';
-import { AccessDeniedInterrupt } from '@auth0/ai/interrupts';
+import { AccessDeniedInterrupt, TokenVaultInterrupt } from '@auth0/ai/interrupts';
 
 import { getRefreshToken, getUser } from './auth0';
 
-// Get the access token for a connection via Auth0
+// Factory: creates a getAccessToken that converts TokenVaultError → TokenVaultInterrupt.
+// Bypasses the broken `instanceof TokenVaultError` check in protect() caused by
+// Turbopack/webpack creating separate module instances. See docs/auth0-ai-instanceof-issue.md.
+export function createGetAccessToken(connection: string, scopes: string[]) {
+  return async () => {
+    try {
+      return getAccessTokenFromTokenVault();
+    } catch {
+      throw new TokenVaultInterrupt(
+        `Authorization required to access the Token Vault: ${connection}.`,
+        { connection, scopes, requiredScopes: scopes },
+      );
+    }
+  };
+}
+
+// Generic version (kept for backwards compat — avoid using in new tools)
 export const getAccessToken = async () => getAccessTokenFromTokenVault();
 
 const auth0AI = new Auth0AI();

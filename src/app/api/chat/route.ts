@@ -3,14 +3,13 @@ import {
   streamText,
   stepCountIs,
   type UIMessage,
-  type StepResult,
   createUIMessageStream,
   createUIMessageStreamResponse,
   convertToModelMessages,
 } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { setAIContext } from '@auth0/ai-vercel';
-import { errorSerializer, withInterruptions } from '@auth0/ai-vercel/interrupts';
+import { InterruptionPrefix, withInterruptions } from '@auth0/ai-vercel/interrupts';
 import { Auth0Interrupt } from '@auth0/ai/interrupts';
 import { context, trace } from '@opentelemetry/api';
 import { setSession, setUser } from '@arizeai/openinference-core';
@@ -27,18 +26,33 @@ import { listRepositories } from '@/lib/tools/list-gh-repos';
 import { listGitHubEvents } from '@/lib/tools/list-gh-events';
 import { listSlackChannels } from '@/lib/tools/list-slack-channels';
 
-const stopOnAuthInterrupt = ({ steps }: { steps: StepResult<any>[] }) =>
-  steps[steps.length - 1]?.content.some(
-    (part) => part.type === 'tool-error' && (part as any).error instanceof Auth0Interrupt,
-  ) ?? false;
+// Local error serializer — uses Auth0Interrupt.isInterrupt() (name-based)
+// instead of `instanceof` which fails across Turbopack module boundaries.
+function authErrorSerializer(errHandler: (err: unknown) => string) {
+  return (error: any) => {
+    if (!Auth0Interrupt.isInterrupt(error.cause)) {
+      return errHandler(error);
+    }
+    const serializableError = {
+      ...error.cause.toJSON(),
+      toolCall: {
+        id: error.toolCallId,
+        args: error.toolArgs,
+        name: error.toolName,
+      },
+    };
+    return `${InterruptionPrefix}${JSON.stringify(serializableError)}`;
+  };
+}
 
 const date = new Date().toISOString();
 
-const AGENT_SYSTEM_TEMPLATE = `You are a personal assistant named Assistant0. You are a helpful assistant that can answer questions and help with tasks. 
+const AGENT_SYSTEM_TEMPLATE = `You are a personal assistant named Assistant0. You are a helpful assistant that can answer questions and help with tasks.
 You have access to a set of tools. When using tools, you MUST provide valid JSON arguments. Always format tool call arguments as proper JSON objects.
 For example, when calling shop_online tool, format like this:
 {"product": "iPhone", "qty": 1, "priceLimit": 1000}
-Use the tools as needed to answer the user's question. Render the email body as a markdown block, do not wrap it in code blocks. The current date and time is ${date}.`;
+Use the tools as needed to answer the user's question. When a user's request can be answered by calling a tool, call the tool immediately using sensible defaults for any optional parameters. Do not ask the user to clarify optional parameters — just make the call and present the results.
+Render the email body as a markdown block, do not wrap it in code blocks. The current date and time is ${date}.`;
 
 /**
  * This handler initializes and calls an tool calling agent.
@@ -79,24 +93,28 @@ export async function POST(req: NextRequest) {
             system: AGENT_SYSTEM_TEMPLATE,
             messages: modelMessages,
             tools: tools as any,
-            stopWhen: [stepCountIs(5), stopOnAuthInterrupt],
+            stopWhen: stepCountIs(5),
             experimental_telemetry: {
               isEnabled: true,
               functionId: 'assistant0-chat',
             },
-            onFinish: (output) => {
-              if (output.finishReason === 'tool-calls') {
-                const lastMessage = output.content[output.content.length - 1];
-                if (lastMessage?.type === 'tool-error') {
-                  const { toolName, toolCallId, error, input } = lastMessage;
+            onStepFinish: (step) => {
+              // Detect auth interrupts immediately when the step finishes,
+              // BEFORE the LLM gets a second turn to generate verbose error text.
+              // Cannot use onFinish (notify() swallows errors) or stopWhen
+              // (only evaluated for client-side tool calls).
+              for (const part of step.content) {
+                if (part.type === 'tool-error' && Auth0Interrupt.isInterrupt((part as any).error)) {
+                  const { toolName, toolCallId, error, input } = part as any;
                   const serializableError = {
-                    cause: error,
-                    toolCallId: toolCallId,
-                    toolName: toolName,
-                    toolArgs: input,
+                    ...(error as any).toJSON(),
+                    toolCall: { id: toolCallId, args: input, name: toolName },
                   };
-
-                  throw serializableError;
+                  writer.write({
+                    type: 'error',
+                    errorText: `${InterruptionPrefix}${JSON.stringify(serializableError)}`,
+                  } as any);
+                  return;
                 }
               }
             },
@@ -108,7 +126,11 @@ export async function POST(req: NextRequest) {
             }),
           );
 
-          await (trace.getTracerProvider() as any).forceFlush?.();
+          try {
+            await (trace.getTracerProvider() as any).forceFlush?.();
+          } catch {
+            // Spans may have already ended; ignore flush errors.
+          }
         });
       },
       {
@@ -116,7 +138,7 @@ export async function POST(req: NextRequest) {
         tools: tools as any,
       },
     ),
-    onError: errorSerializer((err) => {
+    onError: authErrorSerializer((err) => {
       console.log(err);
       return `An error occurred! ${(err as Error).message}`;
     }),

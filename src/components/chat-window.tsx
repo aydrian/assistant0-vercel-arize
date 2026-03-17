@@ -121,7 +121,20 @@ export function ChatWindow(props: {
           <div>{props.emptyStateComponent}</div>
         ) : (
           <>
-            <ChatMessages aiEmoji={props.emoji} messages={messages} emptyStateComponent={props.emptyStateComponent} />
+            <ChatMessages
+              aiEmoji={props.emoji}
+              messages={
+                toolInterrupt
+                  ? messages.map((m, i) => {
+                      if (m.role === 'assistant' && i === messages.length - 1) {
+                        return { ...m, parts: m.parts?.filter((p: any) => p.type?.startsWith('tool-')) };
+                      }
+                      return m;
+                    })
+                  : messages
+              }
+              emptyStateComponent={props.emptyStateComponent}
+            />
             <div className="flex flex-col max-w-3xl mx-auto pb-12 w-full">
               <TokenVaultInterruptHandler interrupt={toolInterrupt} />
             </div>

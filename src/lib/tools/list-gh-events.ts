@@ -1,6 +1,8 @@
 import { Octokit, RequestError } from 'octokit';
-import { TokenVaultError } from '@auth0/ai/interrupts';
-import { getAccessToken, withGitHubConnection } from '@/lib/auth0-ai';
+import { TokenVaultInterrupt } from '@auth0/ai/interrupts';
+import { createGetAccessToken, withGitHubConnection } from '@/lib/auth0-ai';
+
+const getAccessToken = createGetAccessToken('github', []);
 import { tool } from 'ai';
 import { z } from 'zod';
 
@@ -87,13 +89,23 @@ export const listGitHubEvents = withGitHubConnection(
 
         if (error instanceof RequestError) {
           if (error.status === 401) {
-            throw new TokenVaultError(
+            throw new TokenVaultInterrupt(
               `Authorization required to access your GitHub events. Please connect your GitHub account.`,
+              {
+                connection: 'github',
+                scopes: [],
+                requiredScopes: [],
+              },
             );
           }
           if (error.status === 403) {
-            throw new TokenVaultError(
+            throw new TokenVaultInterrupt(
               `Access forbidden. Your GitHub token may not have the required permissions to access events.`,
+              {
+                connection: 'github',
+                scopes: [],
+                requiredScopes: [],
+              },
             );
           }
         }

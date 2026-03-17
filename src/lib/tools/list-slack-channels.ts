@@ -1,6 +1,8 @@
 import { ErrorCode, WebClient } from '@slack/web-api';
-import { TokenVaultError } from '@auth0/ai/interrupts';
-import { withSlack, getAccessToken } from '@/lib/auth0-ai';
+import { TokenVaultInterrupt } from '@auth0/ai/interrupts';
+import { createGetAccessToken, withSlack } from '@/lib/auth0-ai';
+
+const getAccessToken = createGetAccessToken('sign-in-with-slack', ['channels:read', 'groups:read']);
 import { tool } from 'ai';
 import { z } from 'zod';
 
@@ -31,7 +33,11 @@ export const listSlackChannels = withSlack(
       } catch (error) {
         if (error && typeof error === 'object' && 'code' in error) {
           if (error.code === ErrorCode.HTTPError) {
-            throw new TokenVaultError(`Authorization required to access the Federated Connection`);
+            throw new TokenVaultInterrupt(`Authorization required to access the Federated Connection`, {
+              connection: 'sign-in-with-slack',
+              scopes: ['channels:read', 'groups:read'],
+              requiredScopes: ['channels:read', 'groups:read'],
+            });
           }
         }
 

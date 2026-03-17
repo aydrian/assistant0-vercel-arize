@@ -2,17 +2,16 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { GmailCreateDraft, GmailSearch } from '@langchain/community/tools/gmail';
 
-import { getAccessToken, withGmailRead, withGmailWrite } from '../auth0-ai';
+import { createGetAccessToken, withGmailRead, withGmailWrite } from '../auth0-ai';
 
-// Provide the access token to the Gmail tools
-const gmailParams = {
+// Provide connection-aware access token getters to the Gmail tools.
+// These convert TokenVaultError → TokenVaultInterrupt to bypass the
+// broken instanceof check in protect(). See docs/auth0-ai-instanceof-issue.md.
+const gmailSearch = new GmailSearch({
   credentials: {
-    // Get the access token from Auth0 AI
-    accessToken: getAccessToken,
+    accessToken: createGetAccessToken('google-oauth2', ['openid', 'https://www.googleapis.com/auth/gmail.readonly']),
   },
-};
-
-const gmailSearch = new GmailSearch(gmailParams);
+});
 
 export const gmailSearchTool = withGmailRead(
   tool({
@@ -35,7 +34,11 @@ export const gmailSearchTool = withGmailRead(
   }),
 );
 
-const gmailDraft = new GmailCreateDraft(gmailParams);
+const gmailDraft = new GmailCreateDraft({
+  credentials: {
+    accessToken: createGetAccessToken('google-oauth2', ['openid', 'https://www.googleapis.com/auth/gmail.compose']),
+  },
+});
 
 export const gmailDraftTool = withGmailWrite(
   tool({

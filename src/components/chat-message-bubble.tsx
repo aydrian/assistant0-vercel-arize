@@ -38,6 +38,10 @@ function getToolCallsFromMessage(message: UIMessage): Array<{
   parts.forEach((part: any) => {
     // Check if this part is a tool call (starts with "tool-")
     if (part?.type && part.type.startsWith('tool-') && part.toolCallId) {
+      // Hide withInterruptions replay results — these are internal
+      // implementation details from the Auth0 AI SDK resume flow.
+      if (part.output?.continueInterruption) return;
+
       const toolName = part.type.replace('tool-', '');
 
       // Determine status based on available information
