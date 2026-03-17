@@ -2,6 +2,7 @@ import { type UIMessage } from 'ai';
 import { MemoizedMarkdown } from './memoized-markdown';
 import { cn } from '@/utils/cn';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { PromptUserContainer } from '@/components/auth0-ai/util/prompt-user-container';
 
 function uiMessageToText(message: UIMessage): string {
   if (Array.isArray((message as any).parts)) {
@@ -150,6 +151,15 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
               <ToolCallDisplay key={`${toolCall.toolCallId}-${index}`} toolCall={toolCall} />
             ))}
           </div>
+        )}
+
+        {/* CIBA: show authorization message outside the tool call box */}
+        {toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'pending') && (
+          <PromptUserContainer
+            icon={<Loader2 className="w-5 h-5 animate-spin text-blue-500" />}
+            title="Waiting for Approval"
+            description="An authorization request has been sent to your mobile device. Please approve it to continue."
+          />
         )}
 
         {/* Render text content if present */}

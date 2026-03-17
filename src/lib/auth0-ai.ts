@@ -92,10 +92,8 @@ export const withAsyncAuthorization = auth0AI.withAsyncAuthorization({
    * In practice, the process that is awaiting the user confirmation
    * could crash or timeout before the user approves the request.
    */
-  onAuthorizationRequest: async (authReq, creds) => {
-    console.log(`An authorization request was sent to your mobile device.`);
+  onAuthorizationRequest: async (_authReq, creds) => {
     await creds;
-    console.log(`Thanks for approving the order.`);
   },
 
   onUnauthorized: async (e: Error) => {
