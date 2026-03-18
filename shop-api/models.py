@@ -1,19 +1,18 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
 
 
 class ProductInfo(BaseModel):
     id: str
     name: str
     category: str
-    price: float
-    image: str
+    pricePerUnit: float
+    imageUrl: str
 
 
 class OrderRequest(BaseModel):
-    product: str
-    qty: int
-    priceLimit: Optional[float] = None
+    product: str = Field(..., min_length=1)
+    qty: int = Field(..., gt=0)
+    priceLimit: float | None = Field(None, gt=0)
 
 
 class OrderResponse(BaseModel):
@@ -25,10 +24,3 @@ class OrderResponse(BaseModel):
     total: float
     estimatedDelivery: str
     status: str
-
-
-class ErrorResponse(BaseModel):
-    error: str
-    query: Optional[str] = None
-    suggestion: Optional[list[str]] = None
-    product: Optional[ProductInfo] = None

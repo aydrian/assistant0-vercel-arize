@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from rapidfuzz import fuzz
 
-from models import ProductInfo, OrderRequest, OrderResponse, ErrorResponse
+from models import ProductInfo, OrderRequest, OrderResponse
 
 router = APIRouter()
 
@@ -19,7 +19,7 @@ with open(CATALOG_PATH, "r") as f:
 CATALOG_INDEX = {item["id"]: item for item in CATALOG}
 
 
-def fuzzy_match_product(query: str, threshold: int = 60) -> dict | None:
+def fuzzy_match_product(query: str, threshold: int = 60) -> dict[str, str | float] | None:
     """Find product using fuzzy matching."""
     best_match = None
     best_score = threshold
@@ -68,7 +68,7 @@ async def create_order(request: OrderRequest):
         )
 
     # Calculate totals
-    price_per_unit = product["price"]
+    price_per_unit = product["pricePerUnit"]
     subtotal = price_per_unit * request.qty
     tax = subtotal * 0.08
     total = subtotal + tax
@@ -79,8 +79,8 @@ async def create_order(request: OrderRequest):
             id=product["id"],
             name=product["name"],
             category=product["category"],
-            price=product["price"],
-            image=f"/static/images/{product['image']}",
+            pricePerUnit=product["pricePerUnit"],
+            imageUrl=f"/static/images/{product['imageUrl']}",
         )
         raise HTTPException(
             status_code=422,
@@ -100,8 +100,8 @@ async def create_order(request: OrderRequest):
         id=product["id"],
         name=product["name"],
         category=product["category"],
-        price=product["price"],
-        image=f"/static/images/{product['image']}",
+        pricePerUnit=product["pricePerUnit"],
+        imageUrl=f"/static/images/{product['imageUrl']}",
     )
 
     estimated_delivery = (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d")
