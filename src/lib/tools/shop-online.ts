@@ -59,14 +59,19 @@ export const shopOnlineTool = withAsyncAuthorization(
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        return { error: `Shop API error: ${response.status} ${response.statusText}` };
+      }
 
       if (!response.ok) {
-        return data;
+        return data?.detail ?? data;
       }
 
       const baseUrl = new URL(apiUrl).origin;
-      if (data.product?.imageUrl) {
+      if (data.product?.imageUrl && typeof data.product.imageUrl === 'string') {
         data.product.imageUrl = `${baseUrl}${data.product.imageUrl}`;
       }
 
