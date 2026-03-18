@@ -53,3 +53,7 @@ bun.lock
 
 # superpowers brainstorming artifacts
 .superpowers/
+
+# Python
+__pycache__/
+*.pyc
