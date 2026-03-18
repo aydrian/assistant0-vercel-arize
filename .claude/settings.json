@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl -X POST http://localhost:8000/shop -H \"Content-Type: application/json\" -d '{\"\"product\"\": \"\"iPhone\"\", \"\"qty\"\": 1}')"
+      "Bash(curl -X POST http://localhost:8000/shop -H \"Content-Type: application/json\" -d '{\"\"product\"\": \"\"iPhone\"\", \"\"qty\"\": 1}')",
+      "Bash(git -C /Users/aydrian.howard/Developer/assistant0-vercel-arize/.claude/worktrees/shop-online-improvements log --oneline)"
     ]
   }
 }

@@ -10,6 +10,7 @@ import './tool-results/task-item';
 import './tool-results/calendar-event-list';
 import './tool-results/gmail-message-list';
 import './tool-results/gmail-draft-card';
+import './tool-results/shop-order-receipt';
 
 function uiMessageToText(message: UIMessage): string {
   if (Array.isArray((message as any).parts)) {
