@@ -10,6 +10,7 @@ import { useInterruptions } from '@auth0/ai-vercel/react';
 
 import { TokenVaultInterruptHandler } from '@/components/TokenVaultInterruptHandler';
 import { ChatMessageBubble } from '@/components/chat-message-bubble';
+import { ThinkingIndicator } from '@/components/thinking-indicator';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 
@@ -105,7 +106,7 @@ export function ChatWindow(props: {
 
   const [input, setInput] = useState('');
 
-  const isChatLoading = status === 'streaming';
+  const isChatLoading = status === 'submitted' || status === 'streaming';
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -135,6 +136,24 @@ export function ChatWindow(props: {
               }
               emptyStateComponent={props.emptyStateComponent}
             />
+            {(() => {
+              const lastMsg = messages[messages.length - 1];
+              const assistantHasContent =
+                lastMsg?.role === 'assistant' &&
+                lastMsg.parts?.some(
+                  (p: any) =>
+                    (p.type === 'text' && p.text?.trim()) || p.type?.startsWith('tool-'),
+                );
+              return (
+                isChatLoading &&
+                messages.length > 0 &&
+                !assistantHasContent && (
+                  <div className="flex flex-col max-w-3xl mx-auto w-full">
+                    <ThinkingIndicator aiEmoji={props.emoji} />
+                  </div>
+                )
+              );
+            })()}
             <div className="flex flex-col max-w-3xl mx-auto pb-12 w-full">
               <TokenVaultInterruptHandler interrupt={toolInterrupt} />
             </div>

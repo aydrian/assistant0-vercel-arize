@@ -50,3 +50,6 @@ next-env.d.ts
 # Bun
 bun.lock
 .arize-tmp-traces/
+
+# superpowers brainstorming artifacts
+.superpowers/

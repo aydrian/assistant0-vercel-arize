@@ -17,7 +17,7 @@ import { auth0 } from '@/lib/auth0';
 
 import { serpApiTool } from '@/lib/tools/serpapi';
 import { getUserInfoTool } from '@/lib/tools/user-info';
-import { gmailDraftTool, gmailSearchTool } from '@/lib/tools/gmail';
+import { gmailDraftTool, gmailSearchTool } from '@/lib/tools/google-mail';
 import { getCalendarEventsTool } from '@/lib/tools/google-calender';
 import { getTasksTool, createTasksTool } from '@/lib/tools/google-tasks';
 import { shopOnlineTool } from '@/lib/tools/shop-online';
