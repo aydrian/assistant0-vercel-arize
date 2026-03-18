@@ -3,6 +3,10 @@ import { MemoizedMarkdown } from './memoized-markdown';
 import { cn } from '@/utils/cn';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { PromptUserContainer } from '@/components/auth0-ai/util/prompt-user-container';
+import { getToolRenderer } from './tool-results/registry';
+// Side-effect imports: register custom tool renderers
+import './tool-results/task-list';
+import './tool-results/task-item';
 
 function uiMessageToText(message: UIMessage): string {
   if (Array.isArray((message as any).parts)) {
@@ -128,6 +132,9 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
   const { message, aiEmoji } = props;
   const text = uiMessageToText(message);
   const toolCalls = getToolCallsFromMessage(message);
+  const hasRichResults = toolCalls.some(
+    tc => tc.status === 'complete' && getToolRenderer(tc.toolName),
+  );
 
   return (
     <div
@@ -162,8 +169,16 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
           />
         )}
 
+        {/* Render rich tool results if a custom renderer is registered */}
+        {toolCalls
+          .filter(tc => tc.status === 'complete' && getToolRenderer(tc.toolName))
+          .map(tc => {
+            const Renderer = getToolRenderer(tc.toolName)!;
+            return <Renderer key={tc.toolCallId} result={tc.result} args={tc.args} status={tc.status} />;
+          })}
+
         {/* Render text content if present */}
-        {text && <MemoizedMarkdown content={text} id={message.id as any} />}
+        {text && !hasRichResults && <MemoizedMarkdown content={text} id={message.id as any} />}
       </div>
     </div>
   );
