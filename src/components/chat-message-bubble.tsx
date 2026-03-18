@@ -7,6 +7,9 @@ import { getToolRenderer } from './tool-results/registry';
 // Side-effect imports: register custom tool renderers
 import './tool-results/task-list';
 import './tool-results/task-item';
+import './tool-results/calendar-event-list';
+import './tool-results/gmail-message-list';
+import './tool-results/gmail-draft-card';
 
 function uiMessageToText(message: UIMessage): string {
   if (Array.isArray((message as any).parts)) {
