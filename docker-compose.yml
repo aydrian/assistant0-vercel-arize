@@ -12,5 +12,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  shop-api:
+    build: ./shop-api
+    container_name: shop_api_demo
+    ports:
+      - '3001:8000'
+    restart: unless-stopped
+
 volumes:
   postgres_data:
