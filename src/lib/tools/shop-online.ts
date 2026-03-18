@@ -15,11 +15,25 @@ export const shopOnlineTool = withAsyncAuthorization(
     execute: async ({ product, qty, priceLimit }) => {
       console.log(`Ordering ${qty} ${product} with price limit ${priceLimit}`);
 
-      const apiUrl = process.env['SHOP_API_URL']!;
+      const apiUrl = process.env['SHOP_API_URL'];
 
       if (!apiUrl) {
         // No API set, mock a response
-        return `Ordered ${qty} ${product}`;
+        return {
+          orderId: `ORD-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-DEMO01`,
+          product: {
+            name: product,
+            category: 'General',
+            imageUrl: '',
+            pricePerUnit: 29.99,
+          },
+          qty,
+          subtotal: 29.99 * qty,
+          tax: +(29.99 * qty * 0.08).toFixed(2),
+          total: +(29.99 * qty * 1.08).toFixed(2),
+          estimatedDelivery: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+          status: 'confirmed',
+        };
       }
 
       const headers = {
@@ -45,7 +59,18 @@ export const shopOnlineTool = withAsyncAuthorization(
         body: JSON.stringify(body),
       });
 
-      return response.statusText;
+      const data = await response.json();
+
+      if (!response.ok) {
+        return data;
+      }
+
+      const baseUrl = new URL(apiUrl).origin;
+      if (data.product?.imageUrl) {
+        data.product.imageUrl = `${baseUrl}${data.product.imageUrl}`;
+      }
+
+      return data;
     },
   }),
 );
