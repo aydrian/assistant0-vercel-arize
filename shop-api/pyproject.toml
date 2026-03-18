@@ -9,3 +9,6 @@ dependencies = [
     "rapidfuzz",
     "pydantic",
 ]
+
+[dependency-groups]
+dev = []
