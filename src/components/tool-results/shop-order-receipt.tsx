@@ -132,6 +132,10 @@ export function ShopOrderReceipt({ result }: ToolResultProps) {
     );
   }
 
+  if (!result.product || !result.orderId) {
+    return null;
+  }
+
   return <ShopOrderReceiptContent order={result} />;
 }
 

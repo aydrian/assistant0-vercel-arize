@@ -165,7 +165,8 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
         )}
 
         {/* CIBA: show authorization message outside the tool call box */}
-        {toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'pending') && (
+        {toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'pending') &&
+         !toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'complete') && (
           <PromptUserContainer
             icon={<Loader2 className="w-5 h-5 animate-spin text-blue-500" />}
             title="Waiting for Approval"

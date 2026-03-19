@@ -27,7 +27,11 @@ def fuzzy_match_product(query: str, threshold: int = 60) -> dict[str, str | floa
     for product in CATALOG:
         name_score = fuzz.token_set_ratio(query.lower(), product["name"].lower())
         id_score = fuzz.token_set_ratio(query.lower(), product["id"].lower())
-        max_score = max(name_score, id_score)
+        tag_score = max(
+            (fuzz.token_set_ratio(query.lower(), tag.lower()) for tag in product.get("tags", [])),
+            default=0,
+        )
+        max_score = max(name_score, id_score, tag_score)
 
         if max_score > best_score:
             best_score = max_score
