@@ -20,11 +20,19 @@ function ChatMessages(props: {
   aiEmoji?: string;
   className?: string;
 }) {
+  // Hide the "Product Found" search card once the order is confirmed
+  const hasConfirmedOrder = props.messages.some(m =>
+    (m as any).parts?.some((p: any) =>
+      p.type === 'tool-shopOnlineTool' &&
+      (p.state === 'output-available' || p.output !== undefined)
+    )
+  );
+
   return (
     <div className="flex flex-col max-w-3xl mx-auto pb-12 w-full">
-      {props.messages.map((m, i) => {
-        return <ChatMessageBubble key={m.id} message={m} aiEmoji={props.aiEmoji} />;
-      })}
+      {props.messages.map((m) => (
+        <ChatMessageBubble key={m.id} message={m} aiEmoji={props.aiEmoji} hideSearchCard={hasConfirmedOrder} />
+      ))}
     </div>
   );
 }

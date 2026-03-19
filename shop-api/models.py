@@ -10,9 +10,9 @@ class ProductInfo(BaseModel):
 
 
 class OrderRequest(BaseModel):
-    product: str = Field(..., min_length=1)
+    productId: str | None = Field(None, min_length=1)
+    product: str | None = Field(None, min_length=1)
     qty: int = Field(..., gt=0)
-    priceLimit: float | None = Field(None, gt=0)
 
 
 class OrderResponse(BaseModel):
@@ -24,3 +24,12 @@ class OrderResponse(BaseModel):
     total: float
     estimatedDelivery: str
     status: str
+
+
+class SearchResponse(BaseModel):
+    product: ProductInfo
+    qty: int
+    subtotal: float
+    tax: float
+    total: float
+    estimatedDelivery: str

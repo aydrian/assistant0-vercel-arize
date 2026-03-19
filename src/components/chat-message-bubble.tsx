@@ -1,7 +1,10 @@
+'use client';
+
+import { useState } from 'react';
 import { type UIMessage } from 'ai';
 import { MemoizedMarkdown } from './memoized-markdown';
 import { cn } from '@/utils/cn';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
 import { PromptUserContainer } from '@/components/auth0-ai/util/prompt-user-container';
 import { getToolRenderer } from './tool-results/registry';
 // Side-effect imports: register custom tool renderers
@@ -11,6 +14,7 @@ import './tool-results/calendar-event-list';
 import './tool-results/gmail-message-list';
 import './tool-results/gmail-draft-card';
 import './tool-results/shop-order-receipt';
+import './tool-results/shop-product-card';
 
 function uiMessageToText(message: UIMessage): string {
   if (Array.isArray((message as any).parts)) {
@@ -132,13 +136,39 @@ function ToolCallDisplay({
   );
 }
 
-export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string }) {
+function ShopApprovalIcon({ imageUrl, productName }: { imageUrl?: string; productName?: string }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
+  return (
+    <div className="flex items-center gap-2">
+      {imageUrl && !imgFailed ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt={productName || 'Product'}
+          className="w-8 h-8 rounded object-cover"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <ShoppingBag className="w-5 h-5 text-muted-foreground" />
+      )}
+      <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+    </div>
+  );
+}
+
+export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string; hideSearchCard?: boolean }) {
   const { message, aiEmoji } = props;
   const text = uiMessageToText(message);
   const toolCalls = getToolCallsFromMessage(message);
   const hasRichResults = toolCalls.some(
     tc => tc.status === 'complete' && getToolRenderer(tc.toolName),
   );
+
+  // Don't render an empty assistant bubble — the ThinkingIndicator handles this state
+  if (message.role !== 'user' && !text && toolCalls.length === 0) {
+    return null;
+  }
 
   return (
     <div
@@ -164,19 +194,26 @@ export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string 
           </div>
         )}
 
-        {/* CIBA: show authorization message outside the tool call box */}
+        {/* CIBA: show authorization message with product details */}
         {toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'pending') &&
-         !toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'complete') && (
-          <PromptUserContainer
-            icon={<Loader2 className="w-5 h-5 animate-spin text-blue-500" />}
-            title="Waiting for Approval"
-            description="An authorization request has been sent to your mobile device. Please approve it to continue."
-          />
-        )}
+         !toolCalls.some(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'complete') && (() => {
+          const pendingCall = toolCalls.find(tc => tc.toolName === 'shopOnlineTool' && tc.status === 'pending');
+          const { productName, qty, total, imageUrl } = pendingCall?.args ?? {};
+          return (
+            <PromptUserContainer
+              icon={<ShopApprovalIcon imageUrl={imageUrl} productName={productName} />}
+              title={productName ? `Purchasing ${qty}× ${productName}` : 'Waiting for Approval'}
+              description={total
+                ? `Total: $${Number(total).toFixed(2)} — approve on your mobile device to continue.`
+                : 'An authorization request has been sent to your mobile device. Please approve it to continue.'}
+            />
+          );
+        })()}
 
         {/* Render rich tool results if a custom renderer is registered */}
         {toolCalls
-          .filter(tc => tc.status === 'complete' && getToolRenderer(tc.toolName))
+          .filter(tc => tc.status === 'complete' && getToolRenderer(tc.toolName)
+            && !(tc.toolName === 'shopSearchTool' && props.hideSearchCard))
           .map(tc => {
             const Renderer = getToolRenderer(tc.toolName)!;
             return <Renderer key={tc.toolCallId} result={tc.result} args={tc.args} status={tc.status} />;

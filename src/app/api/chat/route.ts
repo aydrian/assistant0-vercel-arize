@@ -20,6 +20,7 @@ import { getUserInfoTool } from '@/lib/tools/user-info';
 import { gmailDraftTool, gmailSearchTool } from '@/lib/tools/google-mail';
 import { getCalendarEventsTool } from '@/lib/tools/google-calender';
 import { getTasksTool, createTasksTool } from '@/lib/tools/google-tasks';
+import { shopSearchTool } from '@/lib/tools/shop-search';
 import { shopOnlineTool } from '@/lib/tools/shop-online';
 import { getContextDocumentsTool } from '@/lib/tools/context-docs';
 import { listRepositories } from '@/lib/tools/list-gh-repos';
@@ -49,9 +50,15 @@ const date = new Date().toISOString();
 
 const AGENT_SYSTEM_TEMPLATE = `You are a personal assistant named Assistant0. You are a helpful assistant that can answer questions and help with tasks.
 You have access to a set of tools. When using tools, you MUST provide valid JSON arguments. Always format tool call arguments as proper JSON objects.
-For example, when calling shop_online tool, format like this:
-{"product": "iPhone", "qty": 1, "priceLimit": 1000}
 Use the tools as needed to answer the user's question. When a user's request can be answered by calling a tool, call the tool immediately using sensible defaults for any optional parameters. Do not ask the user to clarify optional parameters — just make the call and present the results.
+When a user asks to buy something, always use shopSearchTool first to look up the product and get real pricing. Then immediately call shopOnlineTool with the product details extracted from the search results:
+- productId: product.id
+- productName: product.name
+- qty: qty
+- unitPrice: product.pricePerUnit
+- total: total
+- imageUrl: product.imageUrl
+Do not ask the user to confirm before purchasing — the CIBA authorization on their mobile device handles approval.
 Render the email body as a markdown block, do not wrap it in code blocks. The current date and time is ${date}.`;
 
 /**
@@ -74,6 +81,7 @@ export async function POST(req: NextRequest) {
     getCalendarEventsTool,
     getTasksTool,
     createTasksTool,
+    shopSearchTool,
     shopOnlineTool,
     getContextDocumentsTool,
     listRepositories,
