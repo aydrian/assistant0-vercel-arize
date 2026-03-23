@@ -19,6 +19,7 @@ function ChatMessages(props: {
   emptyStateComponent: ReactNode;
   aiEmoji?: string;
   className?: string;
+  interruptedToolCallId?: string;
 }) {
   // Hide the "Product Found" search card once the order is confirmed
   const hasConfirmedOrder = props.messages.some(m =>
@@ -31,7 +32,7 @@ function ChatMessages(props: {
   return (
     <div className="flex flex-col max-w-3xl mx-auto pb-12 w-full">
       {props.messages.map((m) => (
-        <ChatMessageBubble key={m.id} message={m} aiEmoji={props.aiEmoji} hideSearchCard={hasConfirmedOrder} />
+        <ChatMessageBubble key={m.id} message={m} aiEmoji={props.aiEmoji} hideSearchCard={hasConfirmedOrder} interruptedToolCallId={props.interruptedToolCallId} />
       ))}
     </div>
   );
@@ -132,6 +133,7 @@ export function ChatWindow(props: {
           <>
             <ChatMessages
               aiEmoji={props.emoji}
+              interruptedToolCallId={(toolInterrupt as any)?.toolCall?.id}
               messages={
                 toolInterrupt
                   ? messages.map((m, i) => {

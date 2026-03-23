@@ -30,7 +30,7 @@ function uiMessageToText(message: UIMessage): string {
   return (message as any).content ?? '';
 }
 
-function getToolCallsFromMessage(message: UIMessage): Array<{
+function getToolCallsFromMessage(message: UIMessage, interruptedToolCallId?: string): Array<{
   toolCallId: string;
   toolName: string;
   args: any;
@@ -65,11 +65,18 @@ function getToolCallsFromMessage(message: UIMessage): Array<{
         status = 'error';
       }
 
+      // If this tool call was interrupted for authorization, show as pending
+      if (interruptedToolCallId && part.toolCallId === interruptedToolCallId) {
+        status = 'pending';
+      }
+
       toolCalls.push({
         toolCallId: part.toolCallId,
         toolName,
         args: part.input || part.args || {},
-        result: part.output || part.result,
+        result: interruptedToolCallId && part.toolCallId === interruptedToolCallId
+          ? undefined
+          : (part.output || part.result),
         status,
       });
     }
@@ -157,10 +164,10 @@ function ShopApprovalIcon({ imageUrl, productName }: { imageUrl?: string; produc
   );
 }
 
-export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string; hideSearchCard?: boolean }) {
+export function ChatMessageBubble(props: { message: UIMessage; aiEmoji?: string; hideSearchCard?: boolean; interruptedToolCallId?: string }) {
   const { message, aiEmoji } = props;
   const text = uiMessageToText(message);
-  const toolCalls = getToolCallsFromMessage(message);
+  const toolCalls = getToolCallsFromMessage(message, props.interruptedToolCallId);
   const hasRichResults = toolCalls.some(
     tc => tc.status === 'complete' && getToolRenderer(tc.toolName),
   );
